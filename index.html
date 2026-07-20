@@ -39,10 +39,13 @@ body{
 section{scroll-margin-top:90px}
 
 /* ============ LANDING NEON (façon CandyBay) ============ */
+.landing-wrap{height:230vh;position:relative}
 .landing{
-  min-height:100vh;
+  height:100vh;
   display:flex;align-items:center;justify-content:center;flex-direction:column;
-  position:relative;
+  position:sticky;top:0;overflow:hidden;
+  transform-origin:50% 42%;
+  will-change:transform,opacity;
   background:
     radial-gradient(ellipse 90% 70% at 50% 62%, #1c130b 0%, #0d0806 48%, #030202 100%);
 }
@@ -378,6 +381,8 @@ footer{
 footer a{color:var(--cyan);text-decoration:none}
 
 @media(prefers-reduced-motion:reduce){
+  .landing-wrap{height:auto}
+  .landing{position:relative;height:100vh}
   .pill,.pill-ring,.ticker-track,.sign{animation:none}
   .tube,.dot,.neon-on,.npill,.scroll-hint,.neon-word .l{animation:none;opacity:1;transform:none}
   .tube{opacity:.85;stroke-dashoffset:0}
@@ -390,6 +395,7 @@ footer a{color:var(--cyan);text-decoration:none}
 <body>
 
 <!-- ============ LANDING NEON ============ -->
+<div class="landing-wrap" id="landing-wrap">
 <div class="landing" id="landing">
   <div class="sign" role="img" aria-label="Enseigne néon PA6LO">
     <svg viewBox="0 0 660 430" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
@@ -420,6 +426,7 @@ footer a{color:var(--cyan);text-decoration:none}
     </nav>
   </div>
   <a class="scroll-hint" href="#produits" aria-label="Défiler vers le shop">▼</a>
+</div>
 </div>
 
 <div class="blob blob-1"></div>
@@ -535,6 +542,44 @@ footer a{color:var(--cyan);text-decoration:none}
       <div class="card-foot"><span class="price">PARTY PACK</span></div>
     </article>
 
+    <article class="card">
+      <span class="badge new">Nouveau</span>
+      <div class="emoji">🎓</div>
+      <h3>Formagestion</h3>
+      <p>Module Odoo 17 pour organisme de formation : catalogue et sessions, demandes converties en dossiers d'inscription, stagiaires, habilitations électriques, tarification inter/intra.</p>
+      <div class="purity"><label>Couverture métier</label><div class="bar"><i style="width:97%"></i></div></div>
+      <div class="tags"><span class="tag">Odoo 17</span><span class="tag">formation</span><span class="tag">tarification</span></div>
+      <div class="card-foot"><span class="price">ODOO 17</span></div>
+    </article>
+
+    <article class="card">
+      <div class="emoji">🗺️</div>
+      <h3>Forma-cartography</h3>
+      <p>Cartographie d'applications en local : visualiser les briques logicielles et leurs liens d'un coup d'œil, sans rien exposer sur le réseau.</p>
+      <div class="purity"><label>Vision système</label><div class="bar"><i style="width:88%"></i></div></div>
+      <div class="tags"><span class="tag">Python</span><span class="tag">carto</span><span class="tag">local</span></div>
+      <div class="card-foot"><span class="price">LOCAL ONLY</span></div>
+    </article>
+
+    <article class="card">
+      <div class="emoji">🎛️</div>
+      <h3>Orchestrateur</h3>
+      <p>Chef d'orchestre JavaScript pour agents IA : distribue les tâches, surveille l'exécution, garde le tempo de la fourmilière.</p>
+      <div class="purity"><label>Coordination</label><div class="bar"><i style="width:91%"></i></div></div>
+      <div class="tags"><span class="tag">JS</span><span class="tag">agents</span><span class="tag">orchestration</span></div>
+      <div class="card-foot"><span class="price">MAESTRO</span></div>
+    </article>
+
+    <article class="card">
+      <span class="badge lab">Labo</span>
+      <div class="emoji">📈</div>
+      <h3>IA-crypto</h3>
+      <p>Labo d'expérimentation IA × marchés crypto : analyse et signaux pour apprendre, pas pour promettre. Rien à vendre ici non plus.</p>
+      <div class="purity"><label>Expérimentation</label><div class="bar"><i style="width:82%"></i></div></div>
+      <div class="tags"><span class="tag">IA</span><span class="tag">crypto</span><span class="tag">Python</span></div>
+      <div class="card-foot"><span class="price">DYOR</span></div>
+    </article>
+
   </div>
 </section>
 
@@ -549,7 +594,7 @@ footer a{color:var(--cyan);text-decoration:none}
     <div class="stats">
       <div class="stat"><b>14 ans</b><span>de terrain élec</span></div>
       <div class="stat"><b>60+</b><span>agents IA orchestrés</span></div>
-      <div class="stat"><b>7+</b><span>produits au catalogue</span></div>
+      <div class="stat"><b>11</b><span>produits au catalogue</span></div>
       <div class="stat"><b>100%</b><span>autodidacte</span></div>
     </div>
   </div>
@@ -609,9 +654,27 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
 // header visible seulement après la landing
 const topbar=document.getElementById('topbar');
 const landing=document.getElementById('landing');
+const landingWrap=document.getElementById('landing-wrap');
 window.addEventListener('scroll',()=>{
-  topbar.classList.toggle('show',window.scrollY>landing.offsetHeight*.6);
+  topbar.classList.toggle('show',window.scrollY>landingWrap.offsetHeight*.55);
 },{passive:true});
+
+// effet "on entre dans l'enseigne" : zoom + fondu pilotés par le scroll
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+  let raf=null;
+  const zoom=()=>{
+    raf=null;
+    const max=landingWrap.offsetHeight-innerHeight;
+    const p=Math.min(Math.max(max>0?window.scrollY/max:0,0),1);
+    landing.style.transform=`scale(${(1+p*1.35).toFixed(4)})`;
+    const f=Math.min(Math.max((p-.62)/.38,0),1);
+    landing.style.opacity=(1-f*f).toFixed(3);
+    landing.style.pointerEvents=f>.8?'none':'';
+  };
+  window.addEventListener('scroll',()=>{if(!raf)raf=requestAnimationFrame(zoom)},{passive:true});
+  window.addEventListener('resize',()=>{if(!raf)raf=requestAnimationFrame(zoom)},{passive:true});
+  zoom();
+}
 
 // reveal au scroll
 const cards=document.querySelectorAll('.card');
