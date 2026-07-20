@@ -221,9 +221,56 @@ nav.topnav a:focus-visible{outline:2px solid var(--cyan);outline-offset:4px;bord
   text-decoration:none;transition:all .2s;
 }
 .cart:hover{background:var(--rose);color:#fff!important;box-shadow:0 0 24px rgba(255,46,154,.5)}
+
+/* ---------- menu mobile plein écran ---------- */
+.burger{display:none;background:rgba(0,0,0,.3);border:1px solid rgba(139,92,246,.45);border-radius:10px;padding:9px 10px;cursor:pointer}
+.burger span{display:block;width:20px;height:2px;background:var(--ink);margin:4px 0;border-radius:2px;box-shadow:0 0 6px rgba(242,240,255,.5)}
+@media(max-width:820px){
+  .burger{display:block}
+  nav.topnav a{display:none!important}
+}
+.menu-overlay{
+  position:fixed;inset:0;z-index:70;
+  background:rgba(6,5,14,.9);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  opacity:0;pointer-events:none;transition:opacity .28s;
+}
+.menu-overlay.open{opacity:1;pointer-events:auto}
+.menu-close{
+  position:absolute;top:14px;right:5vw;
+  background:none;border:1px solid rgba(255,46,154,.5);color:var(--rose);
+  border-radius:10px;font-size:.95rem;padding:8px 13px;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;
+}
+.menu-close:hover{background:var(--rose);color:#fff;box-shadow:0 0 24px rgba(255,46,154,.5)}
+.menu-links{display:flex;flex-direction:column;gap:6px;text-align:center}
+.menu-links a{
+  font-family:'Unbounded',cursive;font-weight:600;
+  font-size:clamp(1.5rem,7vw,2.2rem);
+  color:var(--ink);text-decoration:none;padding:10px 18px;
+  opacity:0;transform:translateY(16px);
+  transition:opacity .35s,transform .35s,color .2s,text-shadow .2s;
+}
+.menu-links a b{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:.68rem;vertical-align:super;margin-right:12px;color:var(--ink-dim)}
+.menu-overlay.open .menu-links a{opacity:1;transform:none}
+.menu-overlay.open .menu-links a:nth-child(1){transition-delay:.05s}
+.menu-overlay.open .menu-links a:nth-child(2){transition-delay:.12s}
+.menu-overlay.open .menu-links a:nth-child(3){transition-delay:.19s}
+.menu-overlay.open .menu-links a:nth-child(4){transition-delay:.26s}
+.menu-links a:nth-child(1):hover,.menu-links a:nth-child(1):focus-visible{color:var(--cyan);text-shadow:0 0 20px rgba(34,211,238,.85)}
+.menu-links a:nth-child(2):hover,.menu-links a:nth-child(2):focus-visible{color:#fff;text-shadow:0 0 20px rgba(240,233,255,.85)}
+.menu-links a:nth-child(3):hover,.menu-links a:nth-child(3):focus-visible{color:var(--jaune);text-shadow:0 0 20px rgba(255,214,10,.85)}
+.menu-links a:nth-child(4):hover,.menu-links a:nth-child(4):focus-visible{color:var(--rose);text-shadow:0 0 20px rgba(255,46,154,.85)}
+.menu-foot{margin-top:38px;display:flex;flex-direction:column;gap:16px;align-items:center;opacity:0;transition:opacity .4s .3s}
+.menu-overlay.open .menu-foot{opacity:1}
+.menu-foot .mail{color:var(--ink-dim);font-size:.85rem;text-decoration:none;font-family:'JetBrains Mono',monospace}
+.menu-foot .mail:hover{color:var(--cyan)}
+body.menu-lock{overflow:hidden}
+@media(prefers-reduced-motion:reduce){
+  .menu-overlay,.menu-links a,.menu-foot{transition:none}
+}
 @media(max-width:640px){
-  nav.topnav{gap:14px}
-  nav.topnav a:not(.cart):not(.m-keep){display:none}
   section.pad{padding:64px 6vw}
   .sec-head{margin-bottom:34px}
   .hero{padding:104px 6vw 36px;gap:8px}
@@ -454,13 +501,30 @@ footer a{color:var(--cyan);text-decoration:none}
 <header id="topbar">
   <a class="logo" href="#landing">PA6LO</a>
   <nav class="topnav">
-    <a class="m-keep" href="#produits">Shop</a>
+    <a href="#produits">Shop</a>
     <a href="#vendeur">Le vendeur</a>
     <a href="#faq">FAQ</a>
     <a href="#contact">Contact</a>
     <a class="cart" href="https://github.com/P-A-6-L-0" target="_blank" rel="noopener">git clone →</a>
   </nav>
+  <button class="burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menu">
+    <span></span><span></span><span></span>
+  </button>
 </header>
+
+<div class="menu-overlay" id="menu" aria-hidden="true">
+  <button class="menu-close" id="menu-close" aria-label="Fermer le menu">ESC ✕</button>
+  <nav class="menu-links" aria-label="Menu">
+    <a href="#produits"><b>01</b>Shop</a>
+    <a href="#vendeur"><b>02</b>Le vendeur</a>
+    <a href="#faq"><b>03</b>F.A.Q</a>
+    <a href="#contact"><b>04</b>Contact</a>
+  </nav>
+  <div class="menu-foot">
+    <a class="cart" href="https://github.com/P-A-6-L-0" target="_blank" rel="noopener">git clone →</a>
+    <a class="mail" href="mailto:contact@frenchtechia.com">contact@frenchtechia.com</a>
+  </div>
+</div>
 
 <main>
 
@@ -704,6 +768,28 @@ if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
   window.addEventListener('resize',kick,{passive:true});
   kick();cur=target;apply(cur);
 }
+
+// menu mobile plein écran
+const burger=document.getElementById('burger');
+const menu=document.getElementById('menu');
+const menuClose=document.getElementById('menu-close');
+const setMenu=o=>{
+  menu.classList.toggle('open',o);
+  document.body.classList.toggle('menu-lock',o);
+  burger.setAttribute('aria-expanded',o);
+  menu.setAttribute('aria-hidden',!o);
+  if(o){menu.querySelector('a').focus({preventScroll:true})}
+  else{burger.focus({preventScroll:true})}
+};
+burger.addEventListener('click',()=>setMenu(!menu.classList.contains('open')));
+menuClose.addEventListener('click',()=>setMenu(false));
+menu.addEventListener('click',e=>{if(e.target===menu)setMenu(false)});
+menu.querySelectorAll('.menu-links a').forEach(a=>a.addEventListener('click',()=>{
+  setMenu(false);
+  const t=document.querySelector(a.getAttribute('href'));
+  if(t)requestAnimationFrame(()=>t.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'}));
+}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.classList.contains('open'))setMenu(false)});
 
 // reveal au scroll
 const cards=document.querySelectorAll('.card');
